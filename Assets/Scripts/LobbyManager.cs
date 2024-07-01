@@ -32,7 +32,9 @@ public class LobbyManager : MonoBehaviour
     [SerializeField]
     private TMP_Text availableSlotsText = null!;
     [SerializeField]
-    private GameObject playerList = null!;
+    private GameObject playerListContent = null!;
+    [SerializeField]
+    private GameObject playerTextPrefab = null!;
     [SerializeField]
     private Button startGameBtn = null!;
     [SerializeField]
@@ -160,17 +162,25 @@ public class LobbyManager : MonoBehaviour
                 if (IsinLobby())
                 {
                     _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
-                    var playerNames = _currentLobby.Players.Select(p => p.Data["PlayerName"].Value);
                     // delete all children of playerList
-                    foreach (Transform child in playerList.transform)
+                    foreach (Transform child in playerListContent.transform)
                     {
                         Destroy(child.gameObject);
                     }
-                    foreach (var playerName in playerNames)
+                    foreach (var player in _currentLobby.Players)
                     {
-                        var playerText = new GameObject("PlayerText", typeof(RectTransform));
-                        playerText.transform.SetParent(playerList.transform);
-                        playerText.AddComponent<TextMeshProUGUI>().text = playerName;
+                        if(player.Id == _playerId)
+                        {
+                            var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
+                            playerText.GetComponentInChildren<TMP_Text>().text = player.Data["PlayerName"].Value + " (You)";
+                            playerText.GetComponentInChildren<TMP_Text>().color = Color.grey;
+                        }
+                        else
+                        {
+                            var playerName = player.Data["PlayerName"].Value;
+                            var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
+                            playerText.GetComponentInChildren<TMP_Text>().text = playerName;
+                        }
                     }
                     
                     availableSlotsText.text = _currentLobby.MaxPlayers - _currentLobby.AvailableSlots + "/" +
