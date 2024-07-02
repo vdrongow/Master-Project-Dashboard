@@ -161,7 +161,7 @@ public class LoginManager : MonoBehaviour
         }
     }
     
-    private async void StartGame()
+    private void StartGame()
     {
         var gameManager = GameManager.Singleton;
         if (gameManager.CurrentLobby == null || !gameManager.IsHost())

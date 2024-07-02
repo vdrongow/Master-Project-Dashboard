@@ -10,11 +10,19 @@ public class DashboardManager : MonoBehaviour
     private void Awake()
     {
         pauseGameButton.onClick.AddListener(PauseGame);
-        pauseGameButton.GetComponentInChildren<TextMeshProUGUI>().text = "Pause Game";
+        UpdateButtonText();
     }
     
     private void PauseGame()
     {
         var gameManager = GameManager.Singleton;
+        gameManager.SetGamePaused(!gameManager.isGamePaused);
+        UpdateButtonText();
+    }
+    
+    private void UpdateButtonText()
+    {
+        var gameManager = GameManager.Singleton;
+        pauseGameButton.GetComponentInChildren<TextMeshProUGUI>().text = gameManager.isGamePaused ? "Resume Game" : "Pause Game";
     }
 }

@@ -16,6 +16,8 @@ public sealed class GameManager : MonoBehaviour
     
     [HideInInspector]
     public List<string> playerList = new List<string>();
+
+    public bool isGamePaused;
     
     private void Awake()
     {
@@ -76,7 +78,6 @@ public sealed class GameManager : MonoBehaviour
                     { Constants.LOBBY_IS_GAME_PAUSED, new DataObject(DataObject.VisibilityOptions.Member, IsGamePaused().ToString()) }
                 }
             };
-
             CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, updateOptions);
         }
         catch (LobbyServiceException e)
@@ -85,7 +86,7 @@ public sealed class GameManager : MonoBehaviour
         }
     }
     
-    public async void SetPauseGame(bool isPaused)
+    public async void SetGamePaused(bool isPaused)
     {
         if (CurrentLobby == null || !IsHost())
         {
@@ -93,6 +94,7 @@ public sealed class GameManager : MonoBehaviour
         }
         try
         {
+            isGamePaused = isPaused;
             var updateOptions = new UpdateLobbyOptions
             {
                 Data = new Dictionary<string, DataObject>
@@ -101,7 +103,6 @@ public sealed class GameManager : MonoBehaviour
                     { Constants.LOBBY_IS_GAME_PAUSED, new DataObject(DataObject.VisibilityOptions.Member, isPaused.ToString()) }
                 }
             };
-
             CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, updateOptions);
         }
         catch (LobbyServiceException e)
