@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.Services.Authentication;
-using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LobbyManager : MonoBehaviour
+public class LoginManager : MonoBehaviour
 {
-    public static LobbyManager Singleton { get; private set; } = null!;
     public DashboardConfig Config = null!;
     
     [Header("UI Elements for Starting a Lobby")]
@@ -40,23 +37,10 @@ public class LobbyManager : MonoBehaviour
     [SerializeField]
     private Button deleteLobbyBtn = null!;
     
-    private Lobby _currentLobby;
-    private string _playerId;
-    private float _heartbeatTime = 15f;
     private float _roomUpdateTime;
 
     private void Awake()
     {
-        if(Singleton == null)
-        {
-            Singleton = this;
-            DontDestroyOnLoad(this);
-        }
-        else if(Singleton != this)
-        {
-            Destroy(gameObject);
-        }
-        
         startSessionPanel.SetActive(true);
         lobbyPanel.SetActive(false);
         
@@ -64,29 +48,18 @@ public class LobbyManager : MonoBehaviour
         {
             lobbyNameInputField.text = PlayerPrefs.GetString("LobbyName");
         }
-    }
-    
-    private async void Start()
-    {
-        await UnityServices.InitializeAsync();
-        AuthenticationService.Instance.SignedIn += () =>
-        {
-            _playerId = AuthenticationService.Instance.PlayerId;
-            Debug.Log("Signed in " + _playerId);
-        };
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
+        
         createSessionBtn.onClick.AddListener(CreateLobby);
     }
     
     private void Update()
     {
-        HandleLobbyHeartbeat();
         HandleRoomUpdate();
     }
     
     private async void CreateLobby()
     {
+        var gameManager = GameManager.Singleton;
         try
         {
             var lobbyName = lobbyNameInputField.text;
@@ -99,17 +72,33 @@ public class LobbyManager : MonoBehaviour
             var options = new CreateLobbyOptions
             {
                 IsPrivate = Config.isPrivateLobby,
-                Player = GetPlayer(),
+                Player = new Player
+                {
+                    Data = new Dictionary<string, PlayerDataObject>
+                    {
+                        {
+                            Constants.PLAYER_NAME,
+                            new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, gameManager.playerId)
+                        }
+                    }
+                },
                 Data = new Dictionary<string, DataObject>
                 {
-                    { "IsGameStarted", new DataObject(DataObject.VisibilityOptions.Member, "false") }
+                    {
+                        Constants.LOBBY_IS_GAME_STARTED,
+                        new DataObject(DataObject.VisibilityOptions.Member, false.ToString(), DataObject.IndexOptions.S1)
+                    },
+                    {
+                        Constants.LOBBY_IS_GAME_PAUSED,
+                        new DataObject(DataObject.VisibilityOptions.Member, false.ToString(), DataObject.IndexOptions.S2)
+                    }
                 }
             };
-            _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+            gameManager.CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             startSessionPanel.SetActive(false);
             lobbyPanel.SetActive(true);
-            roomName.text = _currentLobby.Name;
-            roomCode.text = _currentLobby.LobbyCode;
+            roomName.text = gameManager.CurrentLobby.Name;
+            roomCode.text = gameManager.CurrentLobby.LobbyCode;
             startGameBtn.onClick.AddListener(StartGame);
             deleteLobbyBtn.onClick.AddListener(DeleteLobby);
             HandleRoomUpdate();
@@ -120,36 +109,10 @@ public class LobbyManager : MonoBehaviour
         }
     }
     
-    private Player GetPlayer()
-    {
-        var player = new Player
-        {
-            Data = new Dictionary<string, PlayerDataObject>
-            {
-                { "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, _playerId) }
-            }
-        };
-
-        return player;
-    }
-    
-    private async void HandleLobbyHeartbeat()
-    {
-        if (_currentLobby == null || !IsHost())
-        {
-            return;
-        }
-        _heartbeatTime -= Time.deltaTime;
-        if (_heartbeatTime <= 0)
-        {
-            _heartbeatTime = 15f;
-            await LobbyService.Instance.SendHeartbeatPingAsync(_currentLobby.Id);
-        }
-    }
-    
     private async void HandleRoomUpdate()
     {
-        if (_currentLobby == null || IsGameStarted())
+        var gameManager = GameManager.Singleton;
+        if (gameManager.CurrentLobby == null || gameManager.IsGameStarted())
         {
             return;
         }
@@ -159,32 +122,32 @@ public class LobbyManager : MonoBehaviour
             _roomUpdateTime = 2f;
             try
             {
-                if (IsinLobby())
+                if (gameManager.IsinLobby())
                 {
-                    _currentLobby = await LobbyService.Instance.GetLobbyAsync(_currentLobby.Id);
+                    gameManager.CurrentLobby = await LobbyService.Instance.GetLobbyAsync(gameManager.CurrentLobby.Id);
                     // delete all children of playerList
                     foreach (Transform child in playerListContent.transform)
                     {
                         Destroy(child.gameObject);
                     }
-                    foreach (var player in _currentLobby.Players)
+                    foreach (var player in gameManager.CurrentLobby.Players)
                     {
-                        if(player.Id == _playerId)
+                        if(player.Id == gameManager.playerId)
                         {
                             var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
-                            playerText.GetComponentInChildren<TMP_Text>().text = player.Data["PlayerName"].Value + " (You)";
+                            playerText.GetComponentInChildren<TMP_Text>().text = "(You)";
                             playerText.GetComponentInChildren<TMP_Text>().color = Color.grey;
                         }
                         else
                         {
-                            var playerName = player.Data["PlayerName"].Value;
+                            var playerName = player.Data[Constants.PLAYER_NAME].Value;
                             var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
                             playerText.GetComponentInChildren<TMP_Text>().text = playerName;
                         }
                     }
                     
-                    availableSlotsText.text = _currentLobby.MaxPlayers - _currentLobby.AvailableSlots + "/" +
-                        _currentLobby.MaxPlayers;
+                    availableSlotsText.text = gameManager.CurrentLobby.MaxPlayers - gameManager.CurrentLobby.AvailableSlots + "/" +
+                                              gameManager.CurrentLobby.MaxPlayers;
                 }
             }
             catch (LobbyServiceException e)
@@ -192,7 +155,7 @@ public class LobbyManager : MonoBehaviour
                 Debug.Log(e);
                 if (e.Reason is LobbyExceptionReason.Forbidden or LobbyExceptionReason.LobbyNotFound)
                 {
-                    _currentLobby = null;
+                    gameManager.CurrentLobby = null;
                 }
             }
         }
@@ -200,21 +163,15 @@ public class LobbyManager : MonoBehaviour
     
     private async void StartGame()
     {
-        if (_currentLobby == null || !IsHost())
+        var gameManager = GameManager.Singleton;
+        if (gameManager.CurrentLobby == null || !gameManager.IsHost())
         {
             return;
         }
         try
         {
-            var updateOptions = new UpdateLobbyOptions
-            {
-                Data = new Dictionary<string, DataObject>
-                {
-                    { "IsGameStarted", new DataObject(DataObject.VisibilityOptions.Member, "true") }
-                }
-            };
-
-            _currentLobby = await LobbyService.Instance.UpdateLobbyAsync(_currentLobby.Id, updateOptions);
+            gameManager.SetGameStarted(true);
+            GameManager.Singleton.playerList = gameManager.CurrentLobby.Players.Select(p => p.Data[Constants.PLAYER_NAME].Value).ToList();
             SceneManager.LoadScene(Config.dashboardScene);
         }
         catch (LobbyServiceException e)
@@ -225,35 +182,14 @@ public class LobbyManager : MonoBehaviour
     
     private void DeleteLobby()
     {
-        if (_currentLobby == null)
+        var gameManager = GameManager.Singleton;
+        if (gameManager.CurrentLobby == null)
         {
             return;
         }
-        LobbyService.Instance.DeleteLobbyAsync(_currentLobby.Id);
-        _currentLobby = null;
+        LobbyService.Instance.DeleteLobbyAsync(gameManager.CurrentLobby.Id);
+        gameManager.CurrentLobby = null;
         lobbyPanel.SetActive(false);
         startSessionPanel.SetActive(true);
-    }
-
-    private bool IsHost() => _currentLobby != null && _currentLobby.HostId == _playerId;
-    
-    private bool IsinLobby()
-    {
-        if (_currentLobby.Players.Any(player => player.Id == _playerId))
-        {
-            return true;
-        }
-
-        _currentLobby = null;
-        return false;
-    }
-    
-    private bool IsGameStarted()
-    {
-        if (_currentLobby == null)
-        {
-            return false;
-        }
-        return _currentLobby.Data["IsGameStarted"].Value == "true";
     }
 }
