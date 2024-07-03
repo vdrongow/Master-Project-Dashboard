@@ -8,9 +8,8 @@ public static class Constants
     
     public const string PLAYER_NAME = "PlayerName";
     public const string PLAYER_FINISHED_LEVELS = "PlayerFinishedLevels";
-    public const string PLAYER_MISTAKES = "PlayerMistakes";
-    public const string PLAYER_SCORE = "PlayerScore";
-    public const string PLAYER_TIME_TAKEN = "PlayerTimeTaken";
+    public const string PLAYER_TOTAL_MISTAKES = "PlayerTotalMistakes";
+    public const string PLAYER_TOTAL_PLAYED_TIME = "PlayerTotalPlayedTime";
 
     #endregion
 }

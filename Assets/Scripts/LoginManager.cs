@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Services.Lobbies;
@@ -15,7 +16,7 @@ public class LoginManager : MonoBehaviour
     [SerializeField]
     private GameObject startSessionPanel = null!;
     [SerializeField]
-    private TMP_InputField lobbyNameInputField = null!;
+    private InputField lobbyNameInputField = null!;
     [SerializeField]
     private Button createSessionBtn = null!;
     
@@ -91,16 +92,22 @@ public class LoginManager : MonoBehaviour
                     {
                         Constants.LOBBY_IS_GAME_PAUSED,
                         new DataObject(DataObject.VisibilityOptions.Member, false.ToString(), DataObject.IndexOptions.S2)
-                    }
+                    },
                 }
             };
+            
             gameManager.CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+            gameManager.SubscribeToLobbyEvents();
+            
             startSessionPanel.SetActive(false);
             lobbyPanel.SetActive(true);
+            
             roomName.text = gameManager.CurrentLobby.Name;
             roomCode.text = gameManager.CurrentLobby.LobbyCode;
+            
             startGameBtn.onClick.AddListener(StartGame);
             deleteLobbyBtn.onClick.AddListener(DeleteLobby);
+            
             HandleRoomUpdate();
         }
         catch (LobbyServiceException e)
@@ -175,7 +182,16 @@ public class LoginManager : MonoBehaviour
         try
         {
             gameManager.SetGameStarted(true);
-            GameManager.Singleton.playerList = gameManager.CurrentLobby.Players.Select(p => p.Data[Constants.PLAYER_NAME].Value).ToList();
+            var lobbyIdCounter = 0;
+            foreach (var lobbyPlayer in gameManager.CurrentLobby.Players)
+            {
+                gameManager.Learners.Add(new LearnPlayer(
+                    name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
+                    playerId: lobbyPlayer.Id,
+                    lobbyId: lobbyIdCounter
+                    ));
+                lobbyIdCounter++;
+            }
             SceneManager.LoadScene(Config.dashboardScene);
         }
         catch (LobbyServiceException e)

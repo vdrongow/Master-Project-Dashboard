@@ -15,7 +15,7 @@ public sealed class GameManager : MonoBehaviour
     public float heartbeatTime = 15f;
     
     [HideInInspector]
-    public List<string> playerList = new List<string>();
+    public List<LearnPlayer> Learners = new();
 
     public bool isGamePaused;
     
@@ -47,6 +47,8 @@ public sealed class GameManager : MonoBehaviour
     {
         HandleLobbyHeartbeat();
     }
+
+    #region Network Lobby
     
     private async void HandleLobbyHeartbeat()
     {
@@ -62,6 +64,37 @@ public sealed class GameManager : MonoBehaviour
         }
     }
     
+    public async void SubscribeToLobbyEvents()
+    {
+        var callbacks = new LobbyEventCallbacks();
+        callbacks.PlayerDataChanged += OnPlayerDataChanged;
+        try
+        {
+            await Lobbies.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+    }
+        
+    private void OnPlayerDataChanged(Dictionary<int, Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>> changedData)
+    {
+        foreach (var (lobbyId, changedOrRemovedLobbyValues) in changedData)
+        {
+            foreach (var (key, value) in changedOrRemovedLobbyValues)
+            {
+                var learner = Learners.Find(learner => learner.LobbyId == lobbyId);
+                if (learner == null)
+                {
+                    continue;
+                }
+                learner.UpdatePlayerData(key, value.Value);
+                Debug.Log($"Player {learner.Name} with ID {lobbyId} changed {key} to {value.Value.Value}");
+            }
+        }
+    }
+    
     public async void SetGameStarted(bool isStarted)
     {
         if (CurrentLobby == null || !IsHost())
@@ -74,8 +107,7 @@ public sealed class GameManager : MonoBehaviour
             {
                 Data = new Dictionary<string, DataObject>
                 {
-                    { Constants.LOBBY_IS_GAME_STARTED, new DataObject(DataObject.VisibilityOptions.Member, isStarted.ToString()) },
-                    { Constants.LOBBY_IS_GAME_PAUSED, new DataObject(DataObject.VisibilityOptions.Member, IsGamePaused().ToString()) }
+                    { Constants.LOBBY_IS_GAME_STARTED, new DataObject(DataObject.VisibilityOptions.Member, isStarted.ToString()) }
                 }
             };
             CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, updateOptions);
@@ -99,7 +131,6 @@ public sealed class GameManager : MonoBehaviour
             {
                 Data = new Dictionary<string, DataObject>
                 {
-                    { Constants.LOBBY_IS_GAME_STARTED, new DataObject(DataObject.VisibilityOptions.Member, IsGameStarted().ToString()) },
                     { Constants.LOBBY_IS_GAME_PAUSED, new DataObject(DataObject.VisibilityOptions.Member, isPaused.ToString()) }
                 }
             };
@@ -148,4 +179,6 @@ public sealed class GameManager : MonoBehaviour
         }
         return CurrentLobby.Data[Constants.LOBBY_IS_GAME_PAUSED].Value == true.ToString();
     }
+    
+    #endregion
 }
