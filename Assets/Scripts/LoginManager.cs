@@ -126,26 +126,30 @@ public class LoginManager : MonoBehaviour
                 {
                     gameManager.CurrentLobby = await LobbyService.Instance.GetLobbyAsync(gameManager.CurrentLobby.Id);
                     // delete all children of playerList
-                    foreach (Transform child in playerListContent.transform)
+                    if (playerListContent != null)
                     {
-                        Destroy(child.gameObject);
-                    }
-                    foreach (var player in gameManager.CurrentLobby.Players)
-                    {
-                        if(player.Id == gameManager.playerId)
+                        foreach (Transform child in playerListContent.transform)
                         {
-                            var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
-                            playerText.GetComponentInChildren<TMP_Text>().text = "(You)";
-                            playerText.GetComponentInChildren<TMP_Text>().color = Color.grey;
+                            Destroy(child.gameObject);
                         }
-                        else
+
+                        foreach (var player in gameManager.CurrentLobby.Players)
                         {
-                            var playerName = player.Data[Constants.PLAYER_NAME].Value;
-                            var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
-                            playerText.GetComponentInChildren<TMP_Text>().text = playerName;
+                            if (player.Id == gameManager.playerId)
+                            {
+                                var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
+                                playerText.GetComponentInChildren<TMP_Text>().text = "(You)";
+                                playerText.GetComponentInChildren<TMP_Text>().color = Color.grey;
+                            }
+                            else
+                            {
+                                var playerName = player.Data[Constants.PLAYER_NAME].Value;
+                                var playerText = Instantiate(playerTextPrefab, playerListContent.transform);
+                                playerText.GetComponentInChildren<TMP_Text>().text = playerName;
+                            }
                         }
                     }
-                    
+
                     availableSlotsText.text = gameManager.CurrentLobby.MaxPlayers - gameManager.CurrentLobby.AvailableSlots + "/" +
                                               gameManager.CurrentLobby.MaxPlayers;
                 }
