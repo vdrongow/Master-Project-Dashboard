@@ -182,16 +182,6 @@ public class LoginManager : MonoBehaviour
         try
         {
             gameManager.SetGameStarted(true);
-            var lobbyIdCounter = 0;
-            foreach (var lobbyPlayer in gameManager.CurrentLobby.Players)
-            {
-                gameManager.Learners.Add(new LearnPlayer(
-                    name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
-                    playerId: lobbyPlayer.Id,
-                    lobbyId: lobbyIdCounter
-                    ));
-                lobbyIdCounter++;
-            }
             SceneManager.LoadScene(Config.dashboardScene);
         }
         catch (LobbyServiceException e)

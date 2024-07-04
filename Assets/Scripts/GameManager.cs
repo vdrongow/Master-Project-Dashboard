@@ -14,7 +14,6 @@ public sealed class GameManager : MonoBehaviour
     public string playerId;
     public float heartbeatTime = 15f;
     
-    [HideInInspector]
     public List<LearnPlayer> Learners = new();
 
     public bool isGamePaused;
@@ -63,11 +62,22 @@ public sealed class GameManager : MonoBehaviour
             await LobbyService.Instance.SendHeartbeatPingAsync(CurrentLobby.Id);
         }
     }
+
+    public void CreateLearnPlayer(int index, Player lobbyPlayer)
+    {
+        Learners.Add(new LearnPlayer(
+            name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
+            playerId: lobbyPlayer.Id,
+            lobbyId: index
+        ));
+    }
     
     public async void SubscribeToLobbyEvents()
     {
         var callbacks = new LobbyEventCallbacks();
         callbacks.PlayerDataChanged += OnPlayerDataChanged;
+        callbacks.PlayerJoined += OnPlayerJoined;
+        callbacks.PlayerLeft += OnPlayerLeft;
         try
         {
             await Lobbies.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
@@ -75,6 +85,23 @@ public sealed class GameManager : MonoBehaviour
         catch (LobbyServiceException e)
         {
             Debug.Log(e);
+        }
+    }
+
+    private void OnPlayerJoined(List<LobbyPlayerJoined> lobbyPlayersJoined)
+    {
+        foreach (var lobbyPlayer in lobbyPlayersJoined)
+        {
+            CreateLearnPlayer(lobbyPlayer.PlayerIndex, lobbyPlayer.Player);
+        }
+    }
+
+    private void OnPlayerLeft(List<int> lobbyIds)
+    {
+        foreach (var lobbyId in lobbyIds)
+        {
+            var learner = Learners.Find(l => l.LobbyId == lobbyId);
+            Learners.Remove(learner);
         }
     }
         
