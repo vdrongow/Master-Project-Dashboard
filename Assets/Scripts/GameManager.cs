@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Adlete;
+using Newtonsoft.Json.Linq;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
@@ -15,6 +18,7 @@ public sealed class GameManager : MonoBehaviour
     public float heartbeatTime = 15f;
     
     public List<LearnPlayer> Learners = new();
+    public LearnPlayer CurrentLearner;
 
     public bool isGamePaused;
     
@@ -92,6 +96,10 @@ public sealed class GameManager : MonoBehaviour
     {
         foreach (var lobbyPlayer in lobbyPlayersJoined)
         {
+            if (lobbyPlayer.Player.Id == playerId)
+            {
+                continue;
+            }
             CreateLearnPlayer(lobbyPlayer.PlayerIndex, lobbyPlayer.Player);
         }
     }
@@ -207,5 +215,28 @@ public sealed class GameManager : MonoBehaviour
         return CurrentLobby.Data[Constants.LOBBY_IS_GAME_PAUSED].Value == true.ToString();
     }
     
+    #endregion
+
+    #region Adlete
+
+    public void FetchLearnerAnalytics()
+    {
+        var moduleConnection = ModuleConnection.Singleton;
+        var adleteLearnerId = moduleConnection.GetLearnerIDFromUsername(CurrentLearner.Name);
+        
+        moduleConnection.LearnerAnalytics(adleteLearnerId, data =>
+        {
+            var jsonString = data.learner.scalarBeliefs.Last();
+            
+            var json = JObject.Parse(jsonString);
+
+            var masteryOfSortingAlgorithm = json["masteryOfSortingAlgorithm"]["value"].ToObject<double>();
+            var learnBasicSkills = json["learnBasicSkills"]["value"].ToObject<double>();
+            var learnBehaviourOfSortingAlgorithm = json["learnBehaviourOfSortingAlgorithms"]["value"].ToObject<double>();
+
+            CurrentLearner.UpdateLearnerData(masteryOfSortingAlgorithm, learnBasicSkills, learnBehaviourOfSortingAlgorithm);
+        });
+    }
+
     #endregion
 }

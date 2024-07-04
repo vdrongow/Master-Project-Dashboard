@@ -182,6 +182,8 @@ public class LoginManager : MonoBehaviour
         try
         {
             gameManager.SetGameStarted(true);
+            gameManager.CurrentLearner = gameManager.Learners.First();
+            gameManager.FetchLearnerAnalytics();
             SceneManager.LoadScene(Config.dashboardScene);
         }
         catch (LobbyServiceException e)

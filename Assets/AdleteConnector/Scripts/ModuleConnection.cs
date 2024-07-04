@@ -11,6 +11,8 @@ namespace Adlete
     [Serializable]
     public class ModuleConnection : MonoBehaviour
     {
+        public static ModuleConnection Singleton { get; private set; } = null!;
+        
         [Tooltip("holds the connection URI to the service")]
         [SerializeField]
         public string apiUrl = "http://localhost:5000/graphql";
@@ -35,7 +37,15 @@ namespace Adlete
 
         private void Awake()
         {
-            DontDestroyOnLoad(this.gameObject);
+            if(Singleton == null)
+            {
+                Singleton = this;
+                DontDestroyOnLoad(this);
+            }
+            else if(Singleton != this)
+            {
+                Destroy(gameObject);
+            }
 
             client = new GraphQLClient(apiUrl);
         }
@@ -174,6 +184,12 @@ namespace Adlete
         {
             StartCoroutine(LearnerRoutines.DeleteLearner(this.client, this.clientToken, learnerId, successCallback, errorCallback, finallyCallback));
         }
+        
+        public string GetLearnerIDFromUsername(string username)
+        {
+            return newLearnerIdPrefix + "_" + username;
+        }
+        
         #endregion
 
         #region Analysis Routines
