@@ -1,9 +1,11 @@
 ﻿using System;
 using Unity.Services.Lobbies.Models;
+using UnityEngine;
 
 public class LearnPlayer
 {
     public string Name { get; set; }
+    public GameObject LearnerInfoGameObject;
     public string PlayerId { get; set; }
     public int LobbyId { get; set; }
     public int FinishedLevels { get; set; }

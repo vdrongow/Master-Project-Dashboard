@@ -28,6 +28,7 @@ public sealed class GameManager : MonoBehaviour
     
     public Action LearnerDataChanged;
     public Action PlayerDataChanged;
+    public Action PlayersLeftOrJoined;
     
     private float _time;
     
@@ -135,6 +136,7 @@ public sealed class GameManager : MonoBehaviour
             }
             CreateLearnPlayer(lobbyPlayer.PlayerIndex, lobbyPlayer.Player);
         }
+        PlayersLeftOrJoined?.Invoke();
     }
 
     private void OnPlayerLeft(List<int> lobbyIds)
@@ -144,6 +146,7 @@ public sealed class GameManager : MonoBehaviour
             var learner = Learners.Find(l => l.LobbyId == lobbyId);
             Learners.Remove(learner);
         }
+        PlayersLeftOrJoined?.Invoke();
     }
         
     private void OnPlayerDataChanged(Dictionary<int, Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>> changedData)
@@ -252,7 +255,7 @@ public sealed class GameManager : MonoBehaviour
 
     #region Adlete
 
-    private void FetchLearnerAnalytics()
+    public void FetchLearnerAnalytics()
     {
         var moduleConnection = ModuleConnection.Singleton;
         var adleteLearnerId = moduleConnection.GetLearnerIDFromUsername(CurrentLearner.Name);

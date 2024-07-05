@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 194a75ff21554724bd36b653873361c1, type: 3}
   m_Name: GameSettings
   m_EditorClassIdentifier: 
+  theme: {fileID: 11400000, guid: e74e9902b97b8cf469ceca32cb211b3d, type: 2}
   devMode: 0
   showDebugLogs: 1
   adlete_requestInterval: 10

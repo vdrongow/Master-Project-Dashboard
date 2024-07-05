@@ -15,6 +15,14 @@ public class DashboardManager : MonoBehaviour
     private TMP_Text roomCode = null!;
     [SerializeField]
     private Button pauseGameButton;
+    [SerializeField]
+    private Transform learnerNameList = null!;
+    [SerializeField]
+    private TextMeshProUGUI currentLearnerText = null!;
+    
+    [Header("Prefabs")]
+    [SerializeField]
+    private GameObject learnerInfoPrefab = null!;
 
     [Header("Charts")]
     [SerializeField] 
@@ -39,6 +47,8 @@ public class DashboardManager : MonoBehaviour
         
         pauseGameButton.onClick.AddListener(PauseGame);
         UpdateButtonText();
+        UpdateLearnerNames();
+        gameManager.PlayersLeftOrJoined += UpdateLearnerNames;
         gameManager.LearnerDataChanged += UpdateOverallPerformance;
         gameManager.PlayerDataChanged += UpdateSummary;
     }
@@ -57,6 +67,47 @@ public class DashboardManager : MonoBehaviour
         var gameManager = GameManager.Singleton;
         pauseGameButton.GetComponentInChildren<TextMeshProUGUI>().text = gameManager.isGamePaused ? "Resume Game" : "Pause Game";
     }
+    
+    private void UpdateLearnerNames()
+    {
+        var gameManager = GameManager.Singleton;
+        foreach (Transform child in learnerNameList.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        foreach (var learner in gameManager.Learners)
+        {
+            var learnerInfo = Instantiate(learnerInfoPrefab, learnerNameList);
+            learner.LearnerInfoGameObject = learnerInfo;
+            var learnerText = learnerInfo.GetComponentInChildren<TextMeshProUGUI>();
+            learnerText.text = learner.Name;
+            var learnerButton = learnerInfo.GetComponent<Button>();
+            learnerButton.onClick.AddListener(() => OnLearnerClicked(learner));
+        }
+
+        // Mark the first item as clicked
+        if (gameManager.Learners.Count > 0)
+        {
+            OnLearnerClicked(gameManager.Learners.First());
+        }
+    }
+
+    private void OnLearnerClicked(LearnPlayer learner)
+    {
+        var gameManager = GameManager.Singleton;
+        // Reset all items to default state
+        foreach (var learnerGo in gameManager.Learners.Select(x => x.LearnerInfoGameObject))
+        {
+            learnerGo.GetComponent<Image>().color = gameManager.gameSettings.theme.backgroundColor;
+        }
+
+        // Mark the clicked item
+        learner.LearnerInfoGameObject.GetComponent<Image>().color = gameManager.gameSettings.theme.colorPalette[0];
+        gameManager.CurrentLearner = learner;
+        currentLearnerText.text = $"Current Learner: {learner.Name}";
+        gameManager.FetchLearnerAnalytics();
+        UpdateSummary();
+    }
 
     #endregion
 
@@ -73,6 +124,7 @@ public class DashboardManager : MonoBehaviour
             { Math.Round(gameManager.CurrentLearner.LearnBasicSkills, 3), 1 };
         series.data[2].data = new List<double>
             { Math.Round(gameManager.CurrentLearner.LearnBehaviourOfSortingAlgorithm, 3), 1 };
+        overallPerformance.RefreshChart(series);
     }
 
     private void UpdateSummary()
