@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Adlete;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,9 +16,17 @@ public class DashboardManager : MonoBehaviour
     [SerializeField]
     private Button pauseGameButton;
 
-    [Header("Charts")] 
+    [Header("Charts")]
     [SerializeField] 
     private RingChart overallPerformance = null!;
+
+    [Space]
+    [SerializeField]
+    private TMP_Text levelsCompletedText = null!;
+    [SerializeField] 
+    private TMP_Text timePlayedText = null!;
+    [SerializeField] 
+    private TMP_Text mistakesMadeText = null!;
     
     private void Awake()
     {
@@ -32,23 +39,8 @@ public class DashboardManager : MonoBehaviour
         
         pauseGameButton.onClick.AddListener(PauseGame);
         UpdateButtonText();
-        UpdateOverallPerformance();
-    }
-
-    private void Start()
-    {
-        var moduleConnection = ModuleConnection.Singleton;
-        // check the status of the module connection
-        moduleConnection.CheckStatus(
-            info => Debug.Log($"StatusCode: {info.statusCode}, StatusMessage: {info.statusDescription}, TimeStamp: {info.timestamp}"),
-            errorString => Debug.Log($"Error while checking status: {errorString}"),
-            () => Debug.Log("CheckStatus finished"));
-        
-        // fetch service configuration
-        moduleConnection.FetchServiceConfiguration(
-            config => Debug.Log($"ServiceConfiguration: {string.Join(",", config.activityNames)}, {string.Join(",", config.initialScalarBeliefIds)}"),
-            errorString => Debug.Log($"Error while fetching service configuration: {errorString}"),
-            () => Debug.Log("FetchServiceConfiguration finished"));
+        gameManager.LearnerDataChanged += UpdateOverallPerformance;
+        gameManager.PlayerDataChanged += UpdateSummary;
     }
 
     #region Game Control
@@ -76,11 +68,23 @@ public class DashboardManager : MonoBehaviour
 
         var series = overallPerformance.series.First();
         series.data[0].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.MasteryOfSortingAlgorithm, 2), 1 };
+            { Math.Round(gameManager.CurrentLearner.MasteryOfSortingAlgorithm, 3), 1 };
         series.data[1].data = new List<double> 
-            { Math.Round(gameManager.CurrentLearner.LearnBasicSkills, 2), 1 };
+            { Math.Round(gameManager.CurrentLearner.LearnBasicSkills, 3), 1 };
         series.data[2].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.LearnBehaviourOfSortingAlgorithm, 2), 1 };
+            { Math.Round(gameManager.CurrentLearner.LearnBehaviourOfSortingAlgorithm, 3), 1 };
+    }
+
+    private void UpdateSummary()
+    {
+        var gameManager = GameManager.Singleton;
+        levelsCompletedText.text = gameManager.CurrentLearner.FinishedLevels.ToString();
+        // show the played time in minutes and seconds
+        var time = gameManager.CurrentLearner.TotalPlayedTime;
+        var minutes = time / 60;
+        var seconds = time % 60;
+        timePlayedText.text = $"{minutes:00}:{seconds:00}";
+        mistakesMadeText.text = gameManager.CurrentLearner.TotalMistakes.ToString();
     }
 
     #endregion

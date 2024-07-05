@@ -1,4 +1,5 @@
-﻿using Unity.Services.Lobbies.Models;
+﻿using System;
+using Unity.Services.Lobbies.Models;
 
 public class LearnPlayer
 {
@@ -13,6 +14,9 @@ public class LearnPlayer
     public double LearnBasicSkills;
     public double LearnBehaviourOfSortingAlgorithm;
 
+    private Action _learnerDataChanged;
+    private Action _playerDataChanged;
+
     public LearnPlayer(
         string name, 
         string playerId,
@@ -22,7 +26,9 @@ public class LearnPlayer
         int totalPlayedTime = 0,
         double masteryOfSortingAlgorithm = 0.1,
         double learnBasicSkills = 0.1,
-        double learnBehaviourOfSortingAlgorithm = 0.1)
+        double learnBehaviourOfSortingAlgorithm = 0.1,
+        Action learnerDataChanged = null,
+        Action playerDataChanged = null)
     {
         Name = name;
         PlayerId = playerId;
@@ -33,6 +39,8 @@ public class LearnPlayer
         MasteryOfSortingAlgorithm = masteryOfSortingAlgorithm;
         LearnBasicSkills = learnBasicSkills;
         LearnBehaviourOfSortingAlgorithm = learnBehaviourOfSortingAlgorithm;
+        _learnerDataChanged = learnerDataChanged;
+        _playerDataChanged = playerDataChanged;
     }
 
     public void UpdatePlayerData(string key, PlayerDataObject valueValue)
@@ -49,6 +57,7 @@ public class LearnPlayer
                 TotalPlayedTime = int.Parse(valueValue.Value);
                 break;
         }
+        _playerDataChanged?.Invoke();
     }
 
     public void UpdateLearnerData(double masteryOfSortingAlgorithm,
@@ -58,5 +67,7 @@ public class LearnPlayer
         MasteryOfSortingAlgorithm = masteryOfSortingAlgorithm;
         LearnBasicSkills = learnBasicSkills;
         LearnBehaviourOfSortingAlgorithm = learnBehaviourOfSortingAlgorithm;
+        
+        _learnerDataChanged?.Invoke();
     }
 }

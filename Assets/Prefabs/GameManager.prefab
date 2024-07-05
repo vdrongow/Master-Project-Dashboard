@@ -44,4 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140c4e5a18044024adeed1e9a2ff0c77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerList: []
+  gameSettings: {fileID: 11400000, guid: 84b8fcd86429f8741b028a9f9c4f603b, type: 2}
+  playerId: 
+  isGamePaused: 0
+  heartbeatTime: 15

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Adlete;
@@ -13,14 +14,22 @@ public sealed class GameManager : MonoBehaviour
 {
     public static GameManager Singleton { get; private set; } = null!;
     
+    [Header("Configs")]
+    public GameSettings gameSettings = null!;
+    
+    [Header("Network Lobby")]
     public Lobby CurrentLobby;
     public string playerId;
+    public bool isGamePaused;
     public float heartbeatTime = 15f;
     
     public List<LearnPlayer> Learners = new();
     public LearnPlayer CurrentLearner;
-
-    public bool isGamePaused;
+    
+    public Action LearnerDataChanged;
+    public Action PlayerDataChanged;
+    
+    private float _time;
     
     private void Awake()
     {
@@ -49,7 +58,29 @@ public sealed class GameManager : MonoBehaviour
     private void Update()
     {
         HandleLobbyHeartbeat();
+
+        if (IsGameStarted())
+        {
+            _time += Time.deltaTime;
+            if (_time > gameSettings.adlete_requestInterval)
+            {
+                _time = 0.0f;
+                FetchLearnerAnalytics();
+            }
+        }
     }
+
+    #region Game Control
+
+    public void StartGame()
+    {
+        SetGameStarted(true);
+        CurrentLearner = Learners.First();
+        // set time to Interval for fetching data at start
+        _time = gameSettings.adlete_requestInterval;
+    }
+
+    #endregion
 
     #region Network Lobby
     
@@ -67,12 +98,14 @@ public sealed class GameManager : MonoBehaviour
         }
     }
 
-    public void CreateLearnPlayer(int index, Player lobbyPlayer)
+    private void CreateLearnPlayer(int index, Player lobbyPlayer)
     {
         Learners.Add(new LearnPlayer(
             name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
             playerId: lobbyPlayer.Id,
-            lobbyId: index
+            lobbyId: index,
+            learnerDataChanged: () => LearnerDataChanged.Invoke(),
+            playerDataChanged: () => PlayerDataChanged.Invoke()
         ));
     }
     
@@ -219,7 +252,7 @@ public sealed class GameManager : MonoBehaviour
 
     #region Adlete
 
-    public void FetchLearnerAnalytics()
+    private void FetchLearnerAnalytics()
     {
         var moduleConnection = ModuleConnection.Singleton;
         var adleteLearnerId = moduleConnection.GetLearnerIDFromUsername(CurrentLearner.Name);
@@ -230,9 +263,9 @@ public sealed class GameManager : MonoBehaviour
             
             var json = JObject.Parse(jsonString);
 
-            var masteryOfSortingAlgorithm = json["masteryOfSortingAlgorithm"]["value"].ToObject<double>();
-            var learnBasicSkills = json["learnBasicSkills"]["value"].ToObject<double>();
-            var learnBehaviourOfSortingAlgorithm = json["learnBehaviourOfSortingAlgorithms"]["value"].ToObject<double>();
+            var masteryOfSortingAlgorithm = json["masteryOfSortingAlgorithm"]!["value"]!.ToObject<double>();
+            var learnBasicSkills = json["learnBasicSkills"]!["value"]!.ToObject<double>();
+            var learnBehaviourOfSortingAlgorithm = json["learnBehaviourOfSortingAlgorithms"]!["value"]!.ToObject<double>();
 
             CurrentLearner.UpdateLearnerData(masteryOfSortingAlgorithm, learnBasicSkills, learnBehaviourOfSortingAlgorithm);
         });

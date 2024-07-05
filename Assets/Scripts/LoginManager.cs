@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Adlete;
 using TMPro;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -51,6 +52,22 @@ public class LoginManager : MonoBehaviour
         }
         
         createSessionBtn.onClick.AddListener(CreateLobby);
+    }
+    
+    private void Start()
+    {
+        var moduleConnection = ModuleConnection.Singleton;
+        // check the status of the module connection
+        moduleConnection.CheckStatus(
+            info => Debug.Log($"StatusCode: {info.statusCode}, StatusMessage: {info.statusDescription}, TimeStamp: {info.timestamp}"),
+            errorString => Debug.Log($"Error while checking status: {errorString}"),
+            () => Debug.Log("CheckStatus finished"));
+        
+        // fetch service configuration
+        moduleConnection.FetchServiceConfiguration(
+            config => Debug.Log($"ServiceConfiguration: {string.Join(",", config.activityNames)}, {string.Join(",", config.initialScalarBeliefIds)}"),
+            errorString => Debug.Log($"Error while fetching service configuration: {errorString}"),
+            () => Debug.Log("FetchServiceConfiguration finished"));
     }
     
     private void Update()
@@ -181,9 +198,7 @@ public class LoginManager : MonoBehaviour
         }
         try
         {
-            gameManager.SetGameStarted(true);
-            gameManager.CurrentLearner = gameManager.Learners.First();
-            gameManager.FetchLearnerAnalytics();
+            gameManager.StartGame();
             SceneManager.LoadScene(Config.dashboardScene);
         }
         catch (LobbyServiceException e)
