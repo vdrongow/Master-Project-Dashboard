@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Adlete;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
@@ -15,6 +13,8 @@ using UnityEngine;
 public sealed class GameManager : MonoBehaviour
 {
     public static GameManager Singleton { get; private set; } = null!;
+    
+    public static Config Config { get; private set; } = null!;
     
     [Header("Configs")]
     public GameSettings gameSettings = null!;
@@ -45,6 +45,10 @@ public sealed class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+        // Load the config file
+        var configJson = File.ReadAllText(Constants.PATH_TO_CONFIG);
+        Config = JsonConvert.DeserializeObject<Config>(configJson);
     }
     
     private async void Start()

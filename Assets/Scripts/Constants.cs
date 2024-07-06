@@ -1,6 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 public static class Constants
 {
+    public const string PATH_TO_CONFIG = "Assets/sortingAlgorithmConfig.json";
+    
     #region Lobby Variables
 
     public const string LOBBY_IS_GAME_STARTED = "LobbyIsGameStarted";
