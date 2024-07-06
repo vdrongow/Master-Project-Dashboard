@@ -49,7 +49,7 @@ public class DashboardManager : MonoBehaviour
         UpdateButtonText();
         UpdateLearnerNames();
         gameManager.PlayersLeftOrJoined += UpdateLearnerNames;
-        gameManager.LearnerDataChanged += UpdateOverallPerformance;
+        gameManager.LearnerDataChanged += UpdateLearnerCharts;
         gameManager.PlayerDataChanged += UpdateSummary;
     }
 
@@ -113,18 +113,21 @@ public class DashboardManager : MonoBehaviour
 
     #region Charts
 
-    private void UpdateOverallPerformance()
+    private void UpdateLearnerCharts()
     {
         var gameManager = GameManager.Singleton;
 
+        // Update overall performance
         var series = overallPerformance.series.First();
         series.data[0].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.MasteryOfSortingAlgorithm, 3), 1 };
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().MasteryOfSortingAlgorithm.Value, 3), 1 };
         series.data[1].data = new List<double> 
-            { Math.Round(gameManager.CurrentLearner.LearnBasicSkills, 3), 1 };
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().LearnBasicSkills.Value, 3), 1 };
         series.data[2].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.LearnBehaviourOfSortingAlgorithm, 3), 1 };
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().LearnBehaviourOfSortingAlgorithms.Value, 3), 1 };
         overallPerformance.RefreshChart(series);
+        
+        
     }
 
     private void UpdateSummary()

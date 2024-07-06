@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
@@ -11,12 +12,9 @@ public class LearnPlayer
     public int FinishedLevels { get; set; }
     public int TotalMistakes { get; set; }
     public int TotalPlayedTime { get; set; }
+    
+    public List<ScalarBeliefs> ScalarBeliefsList = new();
 
-    public double MasteryOfSortingAlgorithm;
-    public double LearnBasicSkills;
-    public double LearnBehaviourOfSortingAlgorithm;
-
-    private Action _learnerDataChanged;
     private Action _playerDataChanged;
 
     public LearnPlayer(
@@ -26,10 +24,6 @@ public class LearnPlayer
         int finishedLevels = 0, 
         int totalMistakes = 0,
         int totalPlayedTime = 0,
-        double masteryOfSortingAlgorithm = 0.1,
-        double learnBasicSkills = 0.1,
-        double learnBehaviourOfSortingAlgorithm = 0.1,
-        Action learnerDataChanged = null,
         Action playerDataChanged = null)
     {
         Name = name;
@@ -38,10 +32,6 @@ public class LearnPlayer
         FinishedLevels = finishedLevels;
         TotalMistakes = totalMistakes;
         TotalPlayedTime = totalPlayedTime;
-        MasteryOfSortingAlgorithm = masteryOfSortingAlgorithm;
-        LearnBasicSkills = learnBasicSkills;
-        LearnBehaviourOfSortingAlgorithm = learnBehaviourOfSortingAlgorithm;
-        _learnerDataChanged = learnerDataChanged;
         _playerDataChanged = playerDataChanged;
     }
 
@@ -60,16 +50,5 @@ public class LearnPlayer
                 break;
         }
         _playerDataChanged?.Invoke();
-    }
-
-    public void UpdateLearnerData(double masteryOfSortingAlgorithm,
-        double learnBasicSkills,
-        double learnBehaviourOfSortingAlgorithm)
-    {
-        MasteryOfSortingAlgorithm = masteryOfSortingAlgorithm;
-        LearnBasicSkills = learnBasicSkills;
-        LearnBehaviourOfSortingAlgorithm = learnBehaviourOfSortingAlgorithm;
-        
-        _learnerDataChanged?.Invoke();
     }
 }

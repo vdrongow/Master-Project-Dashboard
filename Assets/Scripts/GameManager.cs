@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Adlete;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
@@ -105,7 +107,6 @@ public sealed class GameManager : MonoBehaviour
             name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
             playerId: lobbyPlayer.Id,
             lobbyId: index,
-            learnerDataChanged: () => LearnerDataChanged.Invoke(),
             playerDataChanged: () => PlayerDataChanged.Invoke()
         ));
     }
@@ -262,15 +263,13 @@ public sealed class GameManager : MonoBehaviour
         
         moduleConnection.LearnerAnalytics(adleteLearnerId, data =>
         {
-            var jsonString = data.learner.scalarBeliefs.Last();
-            
-            var json = JObject.Parse(jsonString);
-
-            var masteryOfSortingAlgorithm = json["masteryOfSortingAlgorithm"]!["value"]!.ToObject<double>();
-            var learnBasicSkills = json["learnBasicSkills"]!["value"]!.ToObject<double>();
-            var learnBehaviourOfSortingAlgorithm = json["learnBehaviourOfSortingAlgorithms"]!["value"]!.ToObject<double>();
-
-            CurrentLearner.UpdateLearnerData(masteryOfSortingAlgorithm, learnBasicSkills, learnBehaviourOfSortingAlgorithm);
+            CurrentLearner.ScalarBeliefsList.Clear();
+            foreach (var jsonString in data.learner.scalarBeliefs)
+            {
+                var scalarBeliefs = JsonConvert.DeserializeObject<ScalarBeliefs>(jsonString);
+                CurrentLearner.ScalarBeliefsList.Add(scalarBeliefs);
+                LearnerDataChanged.Invoke();
+            }
         });
     }
 
