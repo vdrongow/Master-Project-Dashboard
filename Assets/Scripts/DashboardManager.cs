@@ -19,6 +19,10 @@ public class DashboardManager : MonoBehaviour
     private Transform learnerNameList = null!;
     [SerializeField]
     private TextMeshProUGUI currentLearnerText = null!;
+
+    [Space]
+    [SerializeField]
+    private SkillCharts bubbleSortCharts;
     
     [Header("Prefabs")]
     [SerializeField]
@@ -118,16 +122,56 @@ public class DashboardManager : MonoBehaviour
         var gameManager = GameManager.Singleton;
 
         // Update overall performance
-        var series = overallPerformance.series.First();
-        series.data[0].data = new List<double>
+        var performance = overallPerformance.series.First();
+        performance.data[0].data = new List<double>
             { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().MasteryOfSortingAlgorithm.Value, 3), 1 };
-        series.data[1].data = new List<double> 
+        performance.data[1].data = new List<double> 
             { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().LearnBasicSkills.Value, 3), 1 };
-        series.data[2].data = new List<double>
+        performance.data[2].data = new List<double>
             { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().LearnBehaviourOfSortingAlgorithms.Value, 3), 1 };
-        overallPerformance.RefreshChart(series);
+        overallPerformance.RefreshChart(performance);
         
+        // Update BubbleSort Charts
+        // Update Current Performance
+        var skillPerformance = bubbleSortCharts.skillRingChart.series.First();
+        skillPerformance.data[0].data = new List<double>
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().BubbleSort.Value, 3), 1 };
+        var subSkill1Performance = bubbleSortCharts.subSkill1RingChart.series.First();
+        subSkill1Performance.data[0].data = new List<double>
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().SwapElements.Value, 3), 1 };
+        var subSkill2Performance = bubbleSortCharts.subSkill2RingChart.series.First();
+        subSkill2Performance.data[0].data = new List<double>
+            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().StepOver.Value, 3), 1 };
+
+        // Update Performance Over Time
+        var trendSeries = bubbleSortCharts.performanceLineChart.series.First();
+        trendSeries.data.Clear();
+        var scalarBeliefsCount = gameManager.CurrentLearner.ScalarBeliefsList.Count;
         
+        for (var i = 0; i < scalarBeliefsCount; i++)
+        {
+            var value = Math.Round(gameManager.CurrentLearner.ScalarBeliefsList[i].BubbleSort.Value, 3);
+            trendSeries.data.Add(new SerieData{data = new List<double>{i, value}});
+        }
+        
+        // Update Observation Count
+        bubbleSortCharts.subSkill1ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString();
+        bubbleSortCharts.subSkill2ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString(); // TODO: this is wrong
+        
+        // Update Observations good and bad
+        var subSkill1ObservationsSeries0 = bubbleSortCharts.subSkill1ObservationBarChart.series[0];
+        subSkill1ObservationsSeries0.data[0].data = new List<double>
+            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Good, 3) };
+        var subSkill1ObservationsSeries1 = bubbleSortCharts.subSkill1ObservationBarChart.series[1];
+        subSkill1ObservationsSeries1.data[0].data = new List<double>
+            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Bad, 3) };
+        
+        var subSkill2ObservationsSeries0 = bubbleSortCharts.subSkill2ObservationBarChart.series[0];
+        subSkill2ObservationsSeries0.data[0].data = new List<double>
+            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().StepOver.Good, 3) };
+        var subSkill2ObservationsSeries1 = bubbleSortCharts.subSkill2ObservationBarChart.series[1];
+        subSkill2ObservationsSeries1.data[0].data = new List<double>
+            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().StepOver.Bad, 3) };
     }
 
     private void UpdateSummary()

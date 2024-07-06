@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public class Config
 {
@@ -20,6 +22,14 @@ public class GlobalWeights
     public double RecommendationActivityCorrectIncorrectRatioScore { get; set; }
     public double RecommendationDifficultyFlowModifier { get; set; }
     public double RecommendationDifficultyConstantAddition { get; set; }
+}
+
+public class CompetenceModel
+{
+    public string ID { get; set; }
+    public List<string> States { get; set; }
+    public List<double> Cpt { get; set; }
+    public List<string> Parents { get; set; }
 }
 
 public class ScalarBelief
@@ -85,10 +95,84 @@ public class ScalarBeliefs
     public ScalarBelief IdentifyLargestElement { get; set; }
 }
 
-public class CompetenceModel
+public class ProbabilisticBelief
 {
-    public string ID { get; set; }
-    public List<string> States { get; set; }
-    public List<double> Cpt { get; set; }
-    public List<string> Parents { get; set; }
+    public double Good { get; set; }
+    public double Bad { get; set; }
+}
+
+public class ProbabilisticBeliefs
+{
+    [JsonProperty("masteryOfSortingAlgorithm")]
+    public ProbabilisticBelief MasteryOfSortingAlgorithm { get; set; }
+
+    [JsonProperty("learnBehaviourOfSortingAlgorithms")]
+    public ProbabilisticBelief LearnBehaviourOfSortingAlgorithms { get; set; }
+
+    [JsonProperty("learnBasicSkills")]
+    public ProbabilisticBelief LearnBasicSkills { get; set; }
+
+    [JsonProperty("bubbleSort")]
+    public ProbabilisticBelief BubbleSort { get; set; }
+
+    [JsonProperty("selectionSort")]
+    public ProbabilisticBelief SelectionSort { get; set; }
+
+    [JsonProperty("insertionSort")]
+    public ProbabilisticBelief InsertionSort { get; set; }
+
+    [JsonProperty("swapElements")]
+    public ProbabilisticBelief SwapElements { get; set; }
+
+    [JsonProperty("stepOver")]
+    public ProbabilisticBelief StepOver { get; set; }
+
+    [JsonProperty("foundNewMin")]
+    public ProbabilisticBelief FoundNewMin { get; set; }
+
+    [JsonProperty("noNewMin")]
+    public ProbabilisticBelief NoNewMin { get; set; }
+
+    [JsonProperty("swapFurtherForwards")]
+    public ProbabilisticBelief SwapFurtherForwards { get; set; }
+
+    [JsonProperty("insertElement")]
+    public ProbabilisticBelief InsertElement { get; set; }
+
+    [JsonProperty("identifySmallerNumber")]
+    public ProbabilisticBelief IdentifySmallerNumber { get; set; }
+
+    [JsonProperty("identifySmallestElement")]
+    public ProbabilisticBelief IdentifySmallestElement { get; set; }
+
+    [JsonProperty("numberComparison")]
+    public ProbabilisticBelief NumberComparison { get; set; }
+
+    [JsonProperty("extremeValues")]
+    public ProbabilisticBelief ExtremeBeliefs { get; set; }
+
+    [JsonProperty("identifyLargerNumber")]
+    public ProbabilisticBelief IdentifyLargerNumber { get; set; }
+
+    [JsonProperty("identifyLargestElement")]
+    public ProbabilisticBelief IdentifyLargestElement { get; set; }
+}
+
+public class ProbabilisticValueConverter : JsonConverter<ProbabilisticBelief>
+{
+    public override ProbabilisticBelief ReadJson(JsonReader reader, Type objectType, ProbabilisticBelief existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        var array = JArray.Load(reader);
+        return new ProbabilisticBelief
+        {
+            Good = (double)array[0],
+            Bad = (double)array[1]
+        };
+    }
+
+    public override void WriteJson(JsonWriter writer, ProbabilisticBelief value, JsonSerializer serializer)
+    {
+        var array = new JArray { value.Good, value.Bad };
+        array.WriteTo(writer);
+    }
 }

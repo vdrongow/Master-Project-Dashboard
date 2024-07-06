@@ -20,6 +20,8 @@ public class LoginManager : MonoBehaviour
     private InputField lobbyNameInputField = null!;
     [SerializeField]
     private Button createSessionBtn = null!;
+    [SerializeField]
+    private Toggle withoutDashboardToggle = null!;
     
     [Header("UI Elements for Lobby")]
     [SerializeField]
@@ -115,6 +117,7 @@ public class LoginManager : MonoBehaviour
             
             gameManager.CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             gameManager.SubscribeToLobbyEvents();
+            gameManager.noDashboard = withoutDashboardToggle.isOn;
             
             startSessionPanel.SetActive(false);
             lobbyPanel.SetActive(true);

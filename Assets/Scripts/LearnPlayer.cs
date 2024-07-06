@@ -12,8 +12,10 @@ public class LearnPlayer
     public int FinishedLevels { get; set; }
     public int TotalMistakes { get; set; }
     public int TotalPlayedTime { get; set; }
-    
+
+    public int ObservationCount;
     public List<ScalarBeliefs> ScalarBeliefsList = new();
+    public List<ProbabilisticBeliefs> ProbabilisticBeliefsList = new();
 
     private Action _playerDataChanged;
 
