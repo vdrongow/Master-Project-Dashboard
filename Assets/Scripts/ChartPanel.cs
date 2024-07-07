@@ -41,9 +41,9 @@ public class ChartPanel : MonoBehaviour
         subSkill1Text.text = subSkillNames.subSkill1;
         subSkill2Text.text = subSkillNames.subSkill2;
 
-        skillRingChart.chartName = chartType.AsString();
-        subSkill1RingChart.chartName = subSkillNames.subSkill1;
-        subSkill2RingChart.chartName = subSkillNames.subSkill2;
+        skillRingChart.GetChartComponent<Title>().text = chartType.AsString();
+        subSkill1RingChart.GetChartComponent<Title>().text = subSkillNames.subSkill1;
+        subSkill2RingChart.GetChartComponent<Title>().text = subSkillNames.subSkill2;
     }
 
     public void UpdateCharts()
