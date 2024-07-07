@@ -1,36 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
-public class Config
-{
-    public GlobalWeights GlobalWeights { get; set; }
-    public List<string> ActivityNames { get; set; }
-    public Dictionary<string, Dictionary<string, double>> ActivityObservationWeights { get; set; }
-    public List<string> SimulatedLearnerBehaviorTypes { get; set; }
-    public Dictionary<string, Dictionary<string, ScalarBelief>> InitialScalarBeliefs { get; set; }
-    public Dictionary<string, List<string>> ActivityRecommenderTargets { get; set; }
-    public Dictionary<string, CompetenceModel> CompetenceModel { get; set; }
-}
-
-public class GlobalWeights
-{
-    public double GeneralEvidenceWeight { get; set; }
-    public double RecommendationCompetenceWeaknessScoreWeight { get; set; }
-    public double RecommendationActivityRepetitionScoreWeight { get; set; }
-    public double RecommendationActivityCorrectIncorrectRatioScore { get; set; }
-    public double RecommendationDifficultyFlowModifier { get; set; }
-    public double RecommendationDifficultyConstantAddition { get; set; }
-}
-
-public class CompetenceModel
-{
-    public string ID { get; set; }
-    public List<string> States { get; set; }
-    public List<double> Cpt { get; set; }
-    public List<string> Parents { get; set; }
-}
 
 public class ScalarBelief
 {

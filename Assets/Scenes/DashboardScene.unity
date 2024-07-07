@@ -333,6 +333,10 @@ PrefabInstance:
       value: ModuleConnection
       objectReference: {fileID: 0}
     - target: {fileID: 4255933125262145861, guid: 1b43bd912f123e04487d007c3fe4a74a, type: 3}
+      propertyPath: apiUrl
+      value: http://adlete.fi.muni.cz/sorting-algorithm
+      objectReference: {fileID: 0}
+    - target: {fileID: 4255933125262145861, guid: 1b43bd912f123e04487d007c3fe4a74a, type: 3}
       propertyPath: clientToken
       value: AD01D88C-8C55CF16-7D161503-BAFB6FC8
       objectReference: {fileID: 0}
