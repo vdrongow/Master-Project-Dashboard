@@ -34,6 +34,8 @@ public sealed class GameManager : MonoBehaviour
     public Action PlayerDataChanged;
     public Action PlayersLeftOrJoined;
     
+    private int _requestInterval;
+    
     private float _time;
     
     private void Awake()
@@ -51,6 +53,8 @@ public sealed class GameManager : MonoBehaviour
         // Load the config file
         var configJson = File.ReadAllText(Constants.PATH_TO_CONFIG);
         Config = JsonConvert.DeserializeObject<Config>(configJson);
+        
+        _requestInterval = gameSettings.adlete_requestInterval;
     }
     
     private async void Start()
@@ -71,7 +75,7 @@ public sealed class GameManager : MonoBehaviour
         if (IsGameStarted() && !noDashboard)
         {
             _time += Time.deltaTime;
-            if (_time > gameSettings.adlete_requestInterval)
+            if (_time > _requestInterval)
             {
                 _time = 0.0f;
                 FetchLearnerAnalytics();
@@ -89,7 +93,7 @@ public sealed class GameManager : MonoBehaviour
             CurrentLearner = Learners.First();
         }
         // set time to Interval for fetching data at start
-        _time = gameSettings.adlete_requestInterval;
+        _time = _requestInterval;
     }
 
     #endregion
@@ -271,6 +275,16 @@ public sealed class GameManager : MonoBehaviour
     #endregion
 
     #region Adlete
+    
+    public void IncreaseRequestInterval(int amount = 1)
+    {
+        _requestInterval += amount;
+    }
+    
+    public void DecreaseRequestInterval(int amount = 1)
+    {
+        _requestInterval -= amount;
+    }
 
     public void FetchLearnerAnalytics()
     {
