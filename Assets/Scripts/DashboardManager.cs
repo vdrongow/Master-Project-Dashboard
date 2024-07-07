@@ -10,6 +10,8 @@ public class DashboardManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField]
+    private GameObject chartScrollView = null!;
+    [SerializeField]
     private TMP_Text roomName = null!;
     [SerializeField]
     private TMP_Text roomCode = null!;
@@ -48,10 +50,16 @@ public class DashboardManager : MonoBehaviour
             roomName.text = gameManager.CurrentLobby.Name;
             roomCode.text = gameManager.CurrentLobby.LobbyCode;
         }
+
+        if (gameManager.noDashboard)
+        {
+            chartScrollView.SetActive(false);
+        }
         
         pauseGameButton.onClick.AddListener(PauseGame);
         UpdateButtonText();
         UpdateLearnerNames();
+        
         gameManager.PlayersLeftOrJoined += UpdateLearnerNames;
         gameManager.LearnerDataChanged += UpdateLearnerCharts;
         gameManager.PlayerDataChanged += UpdateSummary;
@@ -103,6 +111,11 @@ public class DashboardManager : MonoBehaviour
         foreach (var learnerGo in gameManager.Learners.Select(x => x.LearnerInfoGameObject))
         {
             learnerGo.GetComponent<Image>().color = gameManager.gameSettings.theme.backgroundColor;
+        }
+
+        if (gameManager.noDashboard)
+        {
+            return;
         }
 
         // Mark the clicked item

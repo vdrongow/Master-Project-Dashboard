@@ -68,7 +68,7 @@ public sealed class GameManager : MonoBehaviour
     {
         HandleLobbyHeartbeat();
 
-        if (IsGameStarted())
+        if (IsGameStarted() && !noDashboard)
         {
             _time += Time.deltaTime;
             if (_time > gameSettings.adlete_requestInterval)
@@ -84,7 +84,10 @@ public sealed class GameManager : MonoBehaviour
     public void StartGame()
     {
         SetGameStarted(true);
-        CurrentLearner = Learners.First();
+        if (Learners.Count > 0)
+        {
+            CurrentLearner = Learners.First();
+        }
         // set time to Interval for fetching data at start
         _time = gameSettings.adlete_requestInterval;
     }
@@ -107,14 +110,16 @@ public sealed class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateLearnPlayer(int index, Player lobbyPlayer)
+    private LearnPlayer CreateLearnPlayer(int index, Player lobbyPlayer)
     {
-        Learners.Add(new LearnPlayer(
+        var learner = new LearnPlayer(
             name: lobbyPlayer.Data[Constants.PLAYER_NAME].Value,
             playerId: lobbyPlayer.Id,
             lobbyId: index,
             playerDataChanged: () => PlayerDataChanged.Invoke()
-        ));
+        );
+        Learners.Add(learner);
+        return learner;
     }
     
     public async void SubscribeToLobbyEvents()
@@ -141,7 +146,8 @@ public sealed class GameManager : MonoBehaviour
             {
                 continue;
             }
-            CreateLearnPlayer(lobbyPlayer.PlayerIndex, lobbyPlayer.Player);
+            var learner = CreateLearnPlayer(lobbyPlayer.PlayerIndex, lobbyPlayer.Player);
+            CurrentLearner ??= learner;
         }
         PlayersLeftOrJoined?.Invoke();
     }
@@ -158,6 +164,10 @@ public sealed class GameManager : MonoBehaviour
         
     private void OnPlayerDataChanged(Dictionary<int, Dictionary<string, ChangedOrRemovedLobbyValue<PlayerDataObject>>> changedData)
     {
+        if (noDashboard)
+        {
+            return;
+        }
         foreach (var (lobbyId, changedOrRemovedLobbyValues) in changedData)
         {
             foreach (var (key, value) in changedOrRemovedLobbyValues)
@@ -264,6 +274,10 @@ public sealed class GameManager : MonoBehaviour
 
     public void FetchLearnerAnalytics()
     {
+        if (CurrentLearner == null)
+        {
+            return;
+        }
         var moduleConnection = ModuleConnection.Singleton;
         var adleteLearnerId = moduleConnection.GetLearnerIDFromUsername(CurrentLearner.Name);
         
