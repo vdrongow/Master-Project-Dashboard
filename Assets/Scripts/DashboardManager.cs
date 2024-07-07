@@ -13,7 +13,9 @@ public class DashboardManager : MonoBehaviour
     [SerializeField]
     private GameObject chartScrollView = null!;
     [SerializeField]
-    private Transform chartContentTransform = null!;
+    private Transform sortingAlgorithmsChartTransform = null!;
+    [SerializeField]
+    private Transform basicSkillsChartTransform = null!;
     [SerializeField]
     private TMP_Text roomName = null!;
     [SerializeField]
@@ -63,6 +65,10 @@ public class DashboardManager : MonoBehaviour
             // init charts
             foreach (var chartType in Enum.GetValues(typeof(EChartType)).Cast<EChartType>())
             {
+                var chartContentTransform =
+                    chartType is EChartType.BubbleSort or EChartType.SelectionSort or EChartType.InsertionSort
+                        ? sortingAlgorithmsChartTransform
+                        : basicSkillsChartTransform;
                 var chartPanel = Instantiate(chartPanelPrefab, chartContentTransform)
                     .GetComponent<ChartPanel>();
                 chartPanel.Init(chartType);
