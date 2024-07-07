@@ -21,6 +21,8 @@ public class DashboardManager : MonoBehaviour
     [SerializeField]
     private TMP_Text roomCode = null!;
     [SerializeField]
+    private TMP_Text studentCountText = null!;
+    [SerializeField]
     private Button pauseGameButton;
     [SerializeField]
     private Transform learnerNameList = null!;
@@ -116,6 +118,8 @@ public class DashboardManager : MonoBehaviour
             var learnerButton = learnerInfo.GetComponent<Button>();
             learnerButton.onClick.AddListener(() => OnLearnerClicked(learner));
         }
+        
+        studentCountText.text = $"Students: {gameManager.Learners.Count}";
 
         // Mark the first item as clicked
         if (gameManager.Learners.Count > 0)

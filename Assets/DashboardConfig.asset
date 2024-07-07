@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39842b99b3764b4880c88b15f00cdc9f, type: 3}
   m_Name: DashboardConfig
   m_EditorClassIdentifier: 
-  serverAddress: localhost
-  serverPort: 7777
-  serverPassword: password
+  defaultLobbyName: newSession
+  maxLobbySize: 50
+  isPrivateLobby: 1
   dashboardScene: DashboardScene
   loginScene: Login
