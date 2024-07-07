@@ -27,9 +27,7 @@ public class ChartPanel : MonoBehaviour
     public LineChart performanceLineChart;
 
     [Space]
-    public TextMeshProUGUI subSkill1ObservationCountText;
     public BarChart subSkill1ObservationBarChart;
-    public TextMeshProUGUI subSkill2ObservationCountText;
     public BarChart subSkill2ObservationBarChart;
 
     public void Init(EChartType type)

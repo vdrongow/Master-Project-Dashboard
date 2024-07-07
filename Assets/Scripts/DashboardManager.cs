@@ -162,10 +162,6 @@ public class DashboardManager : MonoBehaviour
         {
             chartPanel.UpdateCharts();
         }
-        
-        // // Update Observation Count
-        // bubbleSortChartPanel.subSkill1ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString();
-        // bubbleSortChartPanel.subSkill2ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString(); // TODO: this is wrong
     }
 
     private void UpdateSummary()

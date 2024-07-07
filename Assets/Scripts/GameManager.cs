@@ -283,8 +283,6 @@ public sealed class GameManager : MonoBehaviour
         
         moduleConnection.LearnerAnalytics(adleteLearnerId, data =>
         {
-            CurrentLearner.ObservationCount = data.observations.Count;
-            
             // TODO: Only add new elements, do not always clear list
             CurrentLearner.ScalarBeliefsList.Clear();
             foreach (var jsonString in data.learner.scalarBeliefs)
@@ -302,21 +300,6 @@ public sealed class GameManager : MonoBehaviour
                 CurrentLearner.ProbabilisticBeliefsList.Add(probabilisticBeliefs);
             }
             LearnerDataChanged.Invoke();
-            
-            // var swapElementsGoodValue = CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Good;
-            // var swapElementsBadValue = CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Bad;
-            //
-            // Debug.Log($"Swap Elements Good Value: {swapElementsGoodValue}");
-            // Debug.Log($"Swap Elements Bad Value: {swapElementsBadValue}");
-            
-            // var stepOverValue = CurrentLearner.ScalarBeliefsList[0].StepOver.Value;
-            //
-            // var learnBasicSkillsValueFirst = CurrentLearner.ScalarBeliefsList.First().LearnBasicSkills.Value;
-            // var learnBasicSkillsValueLast = CurrentLearner.ScalarBeliefsList.Last().LearnBasicSkills.Value;
-            //
-            // Debug.Log($"Scalar belief value for 'stepOver': {stepOverValue}");
-            // Debug.Log($"First Scalar belief value for 'learnBasicSkills': {learnBasicSkillsValueFirst}");
-            // Debug.Log($"Last Scalar belief value for 'learnBasicSkills': {learnBasicSkillsValueLast}");
         });
     }
 
