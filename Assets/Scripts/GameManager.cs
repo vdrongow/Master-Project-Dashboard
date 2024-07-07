@@ -283,22 +283,22 @@ public sealed class GameManager : MonoBehaviour
         
         moduleConnection.LearnerAnalytics(adleteLearnerId, data =>
         {
-            // TODO: Only add new elements, do not always clear list
-            CurrentLearner.ScalarBeliefsList.Clear();
-            foreach (var jsonString in data.learner.scalarBeliefs)
+            // Add new scalar beliefs to the list
+            for(var i = CurrentLearner.ScalarBeliefsList.Count; i < data.learner.scalarBeliefs.Count; i++)
             {
-                var scalarBeliefs = JsonConvert.DeserializeObject<ScalarBeliefs>(jsonString);
+                var scalarBeliefs = JsonConvert.DeserializeObject<ScalarBeliefs>(data.learner.scalarBeliefs[i]);
                 CurrentLearner.ScalarBeliefsList.Add(scalarBeliefs);
             }
-             
-            CurrentLearner.ProbabilisticBeliefsList.Clear();
+            
+            // Add new probabilistic beliefs to the list
             var settings = new JsonSerializerSettings();
             settings.Converters.Add(new ProbabilisticValueConverter());
-            foreach (var jsonString in data.learner.probabilisticBeliefs)
+            for(var i = CurrentLearner.ProbabilisticBeliefsList.Count; i < data.learner.probabilisticBeliefs.Count; i++)
             {
-                var probabilisticBeliefs = JsonConvert.DeserializeObject<ProbabilisticBeliefs>(jsonString, settings);
+                var probabilisticBeliefs = JsonConvert.DeserializeObject<ProbabilisticBeliefs>(data.learner.probabilisticBeliefs[i], settings);
                 CurrentLearner.ProbabilisticBeliefsList.Add(probabilisticBeliefs);
             }
+            
             LearnerDataChanged.Invoke();
         });
     }

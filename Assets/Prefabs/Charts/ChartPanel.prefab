@@ -4659,6 +4659,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3646856183255263041, guid: 96774f136199477478acd0fbacb9e1ab, type: 3}
+      propertyPath: m_SerieLines.Array.data[0].m_Animation.m_Enable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3646856183255263041, guid: 96774f136199477478acd0fbacb9e1ab, type: 3}
       propertyPath: m_Titles.Array.data[0].m_LabelStyle.m_TextStyle.m_TMPFontStyle
       value: 4
       objectReference: {fileID: 0}
