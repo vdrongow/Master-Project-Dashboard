@@ -279,11 +279,13 @@ public sealed class GameManager : MonoBehaviour
     public void IncreaseRequestInterval(int amount = 1)
     {
         _requestInterval += amount;
+        Debug.Log($"Request Interval: {_requestInterval}");
     }
     
     public void DecreaseRequestInterval(int amount = 1)
     {
         _requestInterval -= amount;
+        Debug.Log($"Request Interval: {_requestInterval}");
     }
 
     public void FetchLearnerAnalytics()
