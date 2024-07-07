@@ -61,11 +61,11 @@ public class ChartPanel : MonoBehaviour
         skillRingChart.RefreshChart(skillPerformance);
 
         var subSkill1Performance = subSkill1RingChart.series.First();
-        subSkill1Performance.data[0].data = new List<double> { Math.Round(scalarBeliefValues.subSkill1, 3), 1 };
+        subSkill1Performance.data[0].data = new List<double> { Math.Round(scalarBeliefValues.subSkill1, 2), 1 };
         subSkill1RingChart.RefreshChart(subSkill1Performance);
 
         var subSkill2Performance = subSkill2RingChart.series.First();
-        subSkill2Performance.data[0].data = new List<double> { Math.Round(scalarBeliefValues.subSkill2, 3), 1 };
+        subSkill2Performance.data[0].data = new List<double> { Math.Round(scalarBeliefValues.subSkill2, 2), 1 };
         subSkill2RingChart.RefreshChart(subSkill2Performance);
     }
 
