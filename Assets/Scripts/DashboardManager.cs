@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Enums;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,8 @@ public class DashboardManager : MonoBehaviour
     [SerializeField]
     private GameObject chartScrollView = null!;
     [SerializeField]
+    private Transform chartContentTransform = null!;
+    [SerializeField]
     private TMP_Text roomName = null!;
     [SerializeField]
     private TMP_Text roomCode = null!;
@@ -21,14 +24,12 @@ public class DashboardManager : MonoBehaviour
     private Transform learnerNameList = null!;
     [SerializeField]
     private TextMeshProUGUI currentLearnerText = null!;
-
-    [Space]
-    [SerializeField]
-    private SkillCharts bubbleSortCharts;
     
     [Header("Prefabs")]
     [SerializeField]
     private GameObject learnerInfoPrefab = null!;
+    [SerializeField]
+    private GameObject chartPanelPrefab = null!;
 
     [Header("Charts")]
     [SerializeField] 
@@ -41,6 +42,8 @@ public class DashboardManager : MonoBehaviour
     private TMP_Text timePlayedText = null!;
     [SerializeField] 
     private TMP_Text mistakesMadeText = null!;
+
+    private List<ChartPanel> _chartPanels = new();
     
     private void Awake()
     {
@@ -54,6 +57,17 @@ public class DashboardManager : MonoBehaviour
         if (gameManager.noDashboard)
         {
             chartScrollView.SetActive(false);
+        }
+        else
+        {
+            // init charts
+            foreach (var chartType in Enum.GetValues(typeof(EChartType)).Cast<EChartType>())
+            {
+                var chartPanel = Instantiate(chartPanelPrefab, chartContentTransform)
+                    .GetComponent<ChartPanel>();
+                chartPanel.Init(chartType);
+                _chartPanels.Add(chartPanel);
+            }
         }
         
         pauseGameButton.onClick.AddListener(PauseGame);
@@ -143,48 +157,15 @@ public class DashboardManager : MonoBehaviour
         performance.data[2].data = new List<double>
             { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().LearnBehaviourOfSortingAlgorithms.Value, 3), 1 };
         overallPerformance.RefreshChart(performance);
-        
-        // Update BubbleSort Charts
-        // Update Current Performance
-        var skillPerformance = bubbleSortCharts.skillRingChart.series.First();
-        skillPerformance.data[0].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().BubbleSort.Value, 3), 1 };
-        var subSkill1Performance = bubbleSortCharts.subSkill1RingChart.series.First();
-        subSkill1Performance.data[0].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().SwapElements.Value, 3), 1 };
-        var subSkill2Performance = bubbleSortCharts.subSkill2RingChart.series.First();
-        subSkill2Performance.data[0].data = new List<double>
-            { Math.Round(gameManager.CurrentLearner.ScalarBeliefsList.Last().StepOver.Value, 3), 1 };
 
-        // Update Performance Over Time
-        var trendSeries = bubbleSortCharts.performanceLineChart.series.First();
-        trendSeries.data.Clear();
-        var scalarBeliefsCount = gameManager.CurrentLearner.ScalarBeliefsList.Count;
-        
-        for (var i = 0; i < scalarBeliefsCount; i++)
+        foreach (var chartPanel in _chartPanels)
         {
-            var value = Math.Round(gameManager.CurrentLearner.ScalarBeliefsList[i].BubbleSort.Value, 3);
-            trendSeries.data.Add(new SerieData{data = new List<double>{i, value}});
+            chartPanel.UpdateCharts();
         }
         
-        // Update Observation Count
-        bubbleSortCharts.subSkill1ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString();
-        bubbleSortCharts.subSkill2ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString(); // TODO: this is wrong
-        
-        // Update Observations good and bad
-        var subSkill1ObservationsSeries0 = bubbleSortCharts.subSkill1ObservationBarChart.series[0];
-        subSkill1ObservationsSeries0.data[0].data = new List<double>
-            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Good, 3) };
-        var subSkill1ObservationsSeries1 = bubbleSortCharts.subSkill1ObservationBarChart.series[1];
-        subSkill1ObservationsSeries1.data[0].data = new List<double>
-            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().SwapElements.Bad, 3) };
-        
-        var subSkill2ObservationsSeries0 = bubbleSortCharts.subSkill2ObservationBarChart.series[0];
-        subSkill2ObservationsSeries0.data[0].data = new List<double>
-            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().StepOver.Good, 3) };
-        var subSkill2ObservationsSeries1 = bubbleSortCharts.subSkill2ObservationBarChart.series[1];
-        subSkill2ObservationsSeries1.data[0].data = new List<double>
-            { 0, Math.Round(gameManager.CurrentLearner.ProbabilisticBeliefsList.Last().StepOver.Bad, 3) };
+        // // Update Observation Count
+        // bubbleSortChartPanel.subSkill1ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString();
+        // bubbleSortChartPanel.subSkill2ObservationCountText.text = gameManager.CurrentLearner.ObservationCount.ToString(); // TODO: this is wrong
     }
 
     private void UpdateSummary()
