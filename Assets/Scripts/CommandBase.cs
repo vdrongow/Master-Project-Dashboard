@@ -1,5 +1,6 @@
 ﻿using System;
 
+// this script is based on the following tutorial: https://www.youtube.com/watch?v=VzOEM-4A2OM
 public class CommandBase
 {
     public string CommandId { get; private set; }
