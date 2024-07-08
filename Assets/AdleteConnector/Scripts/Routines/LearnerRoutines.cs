@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
-
+using UnityEngine;
 namespace Adlete
 {
     /// <summary>
@@ -34,6 +34,7 @@ namespace Adlete
             Action<string> errorCallback = null,
             Action finallyCallback = null)
         {
+
             string query = @"mutation createLearner($learnerId:String!, $initialScalarBeliefSetId:String!) {
                                                 createLearner(learnerId:$learnerId, initialScalarBeliefSetId:$initialScalarBeliefSetId) {
                                                     learnerId, 
@@ -44,7 +45,7 @@ namespace Adlete
                                                 }
                                             }";
 
-            string variables = $"{{ \"learnerId\": \"{learnerId}\", \"initialScalarBeliefSetId\": \"{initialScalarBeliefSetId}\" }}";
+            var variables = $"{{ \"learnerId\": \"{learnerId}\", \"initialScalarBeliefSetId\": \"{initialScalarBeliefSetId}\" }}";
 
             using (UnityWebRequest request = client.Query(query, variables, clientToken, "createLearner"))
             {
@@ -53,6 +54,7 @@ namespace Adlete
                 if (GraphQLClient.VerifyResponse(request))
                 {
                     string responseString = request.downloadHandler.text;
+
                     bool isError = GraphQLClient.IsResponseError(responseString);
                     if (!isError)
                     {

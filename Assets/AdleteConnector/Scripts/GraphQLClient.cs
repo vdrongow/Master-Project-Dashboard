@@ -15,19 +15,6 @@ namespace Adlete
             this.url = url;
         }
 
-        [System.Serializable]
-        private class GraphQLQueryNoVariables
-        {
-            public string query;
-        }
-
-        [System.Serializable]
-        private class GraphQLQuery
-        {
-            public string query;
-            public string variables;
-        }
-
         public UnityWebRequest Query(string query, string variables, string accessToken, string operationName)
         {
             string json = BuildQuery(query, variables);
@@ -50,21 +37,16 @@ namespace Adlete
         {
             if (string.IsNullOrEmpty(variables))
             {
-                var fullQuery = new GraphQLQueryNoVariables()
-                {
-                    query = query
-                };
-                return JsonUtility.ToJson(fullQuery);
+                return "{\"query\": \"" + TrimQuery(query) + "\"}"; 
             }
             else
             {
-                var fullQuery = new GraphQLQuery()
-                {
-                    query = query,
-                    variables = variables
-                };
-                return JsonUtility.ToJson(fullQuery);
+                return "{\"query\": \"" + TrimQuery(query) + "\", \"variables\": "+ variables + "}"; 
             }
+        }
+
+        private string TrimQuery(string query) {
+            return query.Replace("\n","").Replace("\r","").Replace("\t","");
         }
 
         public static bool VerifyResponse(UnityWebRequest webRequest)
@@ -76,6 +58,7 @@ namespace Adlete
                     Debug.LogError("Error: " + webRequest.error);
                     return false;
                 case UnityWebRequest.Result.ProtocolError:
+                    Debug.Log(webRequest.downloadHandler.text);
                     Debug.LogError(" HTTP Error: " + webRequest.error);
                     return false;
                 case UnityWebRequest.Result.Success:
@@ -99,7 +82,7 @@ namespace Adlete
         public static JsonSerializerSettings GetJsonDateFormatSerializerSettings()
         {
             JsonSerializerSettings dateFormatSettings = new JsonSerializerSettings();
-            dateFormatSettings.DateFormatString = "yyyy-MM-dd:HH:mm:ss";
+            dateFormatSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ssZ";
 
             return dateFormatSettings;
         }
