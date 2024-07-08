@@ -135,14 +135,14 @@ public class ProbabilisticValueConverter : JsonConverter<ProbabilisticBelief>
         var array = JArray.Load(reader);
         return new ProbabilisticBelief
         {
-            Good = (double)array[0],
-            Bad = (double)array[1]
+            Bad = (double)array[0],
+            Good = (double)array[1]
         };
     }
 
     public override void WriteJson(JsonWriter writer, ProbabilisticBelief value, JsonSerializer serializer)
     {
-        var array = new JArray { value.Good, value.Bad };
+        var array = new JArray { value.Bad, value.Good };
         array.WriteTo(writer);
     }
 }
