@@ -155,6 +155,10 @@ public sealed class GameManager : MonoBehaviour
         {
             var learner = Learners.Find(l => l.LobbyId == lobbyId);
             Learners.Remove(learner);
+            if (CurrentLearner == learner)
+            {
+                CurrentLearner = Learners.Count > 0 ? Learners.First() : null;
+            }
         }
         PlayersLeftOrJoined?.Invoke();
     }

@@ -120,11 +120,24 @@ public class DashboardManager : MonoBehaviour
         }
         
         studentCountText.text = $"Students: {gameManager.Learners.Count}";
+        
+        if (gameManager.noDashboard)
+        {
+            return;
+        }
 
         // Mark the first item as clicked
         if (gameManager.Learners.Count > 0)
         {
+            if (!chartScrollView.activeSelf)
+            {
+                chartScrollView.SetActive(true);
+            }
             OnLearnerClicked(gameManager.Learners.First());
+        }
+        else
+        {
+            chartScrollView.SetActive(false);
         }
     }
 
