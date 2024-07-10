@@ -1829,7 +1829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4255933125262145861, guid: 1b43bd912f123e04487d007c3fe4a74a, type: 3}
       propertyPath: apiUrl
-      value: http://adlete.fi.muni.cz/sorting-algorithm
+      value: https://adlete.fi.muni.cz/sorting-algorithm
       objectReference: {fileID: 0}
     - target: {fileID: 4255933125262145861, guid: 1b43bd912f123e04487d007c3fe4a74a, type: 3}
       propertyPath: clientToken

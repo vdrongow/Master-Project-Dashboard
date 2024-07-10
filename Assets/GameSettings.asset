@@ -15,4 +15,4 @@ MonoBehaviour:
   theme: {fileID: 11400000, guid: e74e9902b97b8cf469ceca32cb211b3d, type: 2}
   devMode: 0
   showDebugLogs: 1
-  adlete_requestInterval: 10
+  adlete_requestInterval: 5
