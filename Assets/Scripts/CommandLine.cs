@@ -7,6 +7,7 @@ public class CommandLine : MonoBehaviour
 {
     private bool _showCommandLine;
     private bool _showHelp;
+    private bool _showStats;
     
     private Vector2 scroll;
     
@@ -15,6 +16,7 @@ public class CommandLine : MonoBehaviour
 
     private static Command<int> INCREASE_REQUEST_INTERVAL;
     private static Command<int> DECREASE_REQUEST_INTERVAL;
+    private static Command PRINT_STATS;
     private static Command HELP;
     
     private void Awake()
@@ -33,6 +35,11 @@ public class CommandLine : MonoBehaviour
             {
                 gameManager.DecreaseRequestInterval(value);
             });
+
+        PRINT_STATS = new Command("print_stats", "Prints the current stats of the game.", "print_stats", () =>
+        {
+            _showStats = true;
+        });
         
         HELP = new Command("help", "Shows all available commands.", "help", () =>
         {
@@ -43,6 +50,7 @@ public class CommandLine : MonoBehaviour
         {
             INCREASE_REQUEST_INTERVAL,
             DECREASE_REQUEST_INTERVAL,
+            PRINT_STATS,
             HELP
         };
     }
@@ -89,6 +97,29 @@ public class CommandLine : MonoBehaviour
                     GUI.Label(rectLabel, label);
                     i++;
                 }
+            }
+            
+            GUI.EndScrollView();
+            
+            y += 100;
+        }
+        
+        if (_showStats)
+        {
+            var gameManager = GameManager.Singleton;
+            var stats = gameManager.Stats;
+            GUI.Box(new Rect(0, y, Screen.width, 100), "");
+            var viewPort = new Rect(0, 0, Screen.width -30, 20 * stats.Count);
+            
+            scroll = GUI.BeginScrollView(new Rect(0, y + 5, Screen.width, 90), scroll, viewPort);
+            
+            var i = 0;
+            foreach (var stat in stats)
+            {
+                var label = $"{stat.Key}: {stat.Value}";
+                var rectLabel = new Rect(5, 20 * i, viewPort.width - 100, 20);
+                GUI.Label(rectLabel, label);
+                i++;
             }
             
             GUI.EndScrollView();

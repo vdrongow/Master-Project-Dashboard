@@ -94,6 +94,10 @@ public class DashboardManager : MonoBehaviour
         var gameManager = GameManager.Singleton;
         gameManager.SetGamePaused(!gameManager.isGamePaused);
         UpdateButtonText();
+        if(!gameManager.Stats.TryAdd("gamePaused", "1"))
+        {
+            gameManager.Stats["gamePaused"] = (int.Parse(gameManager.Stats["gamePaused"]) + 1).ToString();
+        }
     }
     
     private void UpdateButtonText()

@@ -31,6 +31,8 @@ public sealed class GameManager : MonoBehaviour
     public Action PlayerDataChanged;
     public Action PlayersLeftOrJoined;
     
+    public Dictionary<string, string> Stats = new();
+    
     private int _requestInterval;
     
     private float _time;
