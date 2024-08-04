@@ -7,7 +7,7 @@ A demo build is available [here](https://vdrongow.github.io/LA-Dashboard/).
 It requires a desktop browser with support for WebAssembly and WebGL.
 
 ## Features
-- Real-time data visualization of student performance
+- Real-time data visualization of student performance using the [XCharts Library](https://github.com/XCharts-Team/XCharts)
 - Integration with the Sorting Game using the [adlete framework](https://gitlab.com/adaptive-learning-engine)
 - Multiple panels showing various metrics and indicators
 - Adaptive learning insights tailored to individual student progress
